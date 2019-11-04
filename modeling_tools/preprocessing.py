@@ -2,9 +2,8 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.neighbors import NearestNeighbors
-from imblearn.over_sampling import SMOTE 
-import shap
-import graphviz
+from imblearn.over_sampling import SMOTE
+from sklearn.preprocessing import MinMaxScaler
 
 
 def preprocessing_numeric(df_numeric, odd_values, rep_value=-999):
@@ -41,27 +40,43 @@ def preprocessing_numeric(df_numeric, odd_values, rep_value=-999):
     return df_numeric
 
 
-def preprocessing_category(df_cat):
-    for c in df_cat.columns:
-        if 'category' in c:
-            df_cat[c] = df_cat[c].fillna(0)
-        else:
-            df_cat[c] = df_cat[c].fillna(999)
-
+def preprocessing_category(df_cat, given_rm_cols=None, given_colnames=None):
+    df_cat = df_cat.fillna(9999)
     encoder = OneHotEncoder().fit(df_cat)
     onehot = pd.DataFrame(encoder.transform(df_cat).toarray(), columns=encoder.get_feature_names())
-    rm_cols = list(filter(lambda x: x.endswith('999.0'), onehot.columns))
+    rm_cols = list(filter(lambda x: x.endswith('9999.0'), onehot.columns))
+    if given_rm_cols is not None:
+        rm_cols += given_rm_cols
     onehot = onehot.drop(rm_cols, 1)
-    new_cols = []
-    for i, c in enumerate(df_cat.columns):
-        mini = list(filter(lambda x: str(i) in x.split('_')[0], onehot.columns))
-        for cc in mini:
-            cc = cc.split('_')
-            cc[0] = c
-            new_cols += ['_'.join(cc)]
+
+    if given_colnames is None:
+        new_cols = []
+        for i, c in enumerate(df_cat.columns):
+            mini = list(filter(lambda x: str(i) in x.split('_')[0], onehot.columns))
+            for cc in mini:
+                cc = cc.split('_')
+                cc[0] = c
+                new_cols += ['_'.join(cc)]
+    else:
+        new_cols = given_colnames
     onehot.columns = new_cols
     
     return onehot
+
+
+def scale_btw_01(df, given_scaler=None):
+    if given_scaler is None:
+        sc = MinMaxScaler().fit(df)
+    else:
+        sc = given_scaler
+    cols = np.array(df.columns)
+    df_nor = pd.DataFrame(sc.transform(df), columns=cols)    
+    for c in cols[df_nor.max(0) > 1]:
+        df_nor[c].loc[df_nor[c] > 1] = 1
+    for c in cols[df_nor.min(0) < 0]:
+        df_nor[c].loc[df_nor[c] < 0] = 0
+
+    return df_nor, sc
 
 
 def random_oversampling(idx_list, n):
@@ -129,18 +144,3 @@ def binning(df, minmax_by_col_dict):
                 tf = (df[c] > mn) * (df[c] <= mx)
             df[c].loc[tf] = i
     return df
-
-
-def compute_shap_value(model, X):
-    tree_explainer = shap.TreeExplainer(model)
-    shap_values = tree_explainer.shap_values(X)[1]
-
-    return shap_values
-
-
-def each_decision_plot(ith, X, shap_values, y_ratio):
-    shap.decision_plot(y_ratio, shap_values[ith], X.iloc[ith], link='logit')
-
-
-def each_force_plot(ith, X, shap_values, y_ratio):
-    shap.force_plot(y_ratio, shap_values[ith], X.iloc[ith], link='logit', matplotlib=True)

@@ -2,47 +2,10 @@ import pandas as pd
 import numpy as np
 from sklearn import tree
 from sklearn.tree import _tree
-import sklearn.metrics as met
 import graphviz
 from sklearn.ensemble import RandomForestClassifier
-import matplotlib.pyplot as plt
-import seaborn as sns
-from sklearn.metrics import roc_curve, auc
 from lifelines.statistics import multivariate_logrank_test
-
-
-def compute_performance(real_y, pred_y, prob):
-    performance = dict()
-    performance['AUC'] = met.roc_auc_score(real_y, prob)
-    performance['accuracy'] = met.accuracy_score(real_y, pred_y)
-    performance['precision'] = met.precision_score(real_y, pred_y)
-    performance['recall'] = met.recall_score(real_y, pred_y)
-    performance['f1'] = met.f1_score(real_y, pred_y)
-    performance['mcc'] = met.matthews_corrcoef(real_y, pred_y)
-    
-    print(performance)
-
-    return performance
-
-
-def draw_auc(y_true, y_score_list, pos_label=1, label_list=None):
-  sns.set(palette = "colorblind", font_scale = 1.35, rc = {"figure.figsize": (8, 6), "axes.facecolor": ".92"})
-  all_points = list(map(lambda x: roc_curve(y_true, x, pos_label=pos_label), y_score_list))
-
-  plt.figure()
-  plt.xlabel('False Positive Rate')
-  plt.ylabel('True Positive Rate')
-  plt.plot([0, 1], [0, 1], color='black', linestyle='--')
-  plt.xlim([0.0, 1.0])
-  plt.ylim([0.0, 1.05])
-  for i, p in enumerate(all_points):
-    c = np.random.rand(3)
-    l = "AUC = %0.2f" % (auc(p[0], p[1]))
-    if label_list is not None:
-      l = label_list[i] + ' (' + l + ')'
-    plt.plot(p[0], p[1], color=c, lw=2, label=l)
-  plt.legend(loc="lower right")
-  plt.show()
+from metrics import *
 
 
 def tree_model_with_performance(train_X_y, min_sample_leaf, max_depth=None, valid_X_y=None, class_weight=None):
@@ -339,7 +302,7 @@ def modeling_random_forest(X, y, n_estimators, max_depth, min_sample_leaf, ratio
 
 
 def select_important_variables(X, y, topN, n_estimators, max_depth, min_sample_leaf, ratio_features):
-    rf, features = modeling_random_forest(X, y, n_estimators, max_depth, min_sample_leaf, ratio_features)
+    _, features = modeling_random_forest(X, y, n_estimators, max_depth, min_sample_leaf, ratio_features)
     return features['feature'].values[:topN]
 
 
