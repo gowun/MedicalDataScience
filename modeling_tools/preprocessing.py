@@ -25,7 +25,10 @@ def preprocessing_numeric(df_numeric, odd_values, rep_value=-999):
                 df_numeric[c] = df_numeric[c].astype(int)
             except:
                 tmp = list(map(lambda x: inconvertable(x), df_numeric[c]))
-                df_numeric[c].loc[tmp] = str(rep_value)
+                if rep_value == 'neighbor_mean':
+                    df_numeric[c].loc[tmp] = list(map(lambda x: str(round(df_numeric[c].iloc[x].mean())), nn[tmp]))
+                else:
+                    df_numeric[c].loc[tmp] = str(rep_value)
                 df_numeric[c] = df_numeric[c].astype(int)
 
         if rep_value == 'neighbor_mean':
