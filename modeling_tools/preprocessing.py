@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.neighbors import NearestNeighbors
 from imblearn.over_sampling import SMOTE 
 import shap
 import graphviz
@@ -14,6 +15,9 @@ def preprocessing_numeric(df_numeric, odd_values, rep_value=-999):
         except:
             return True
     
+    if rep_value == 'neighbor_mean':
+        nn = NearestNeighbors().fit(df_numeric).kneighbors(df_numeric, 5)[1][:, 1:]
+    
     for c in df_numeric.columns:
         # 문자형 -> 숫자형
         if df_numeric[c].dtypes == 'O':
@@ -23,11 +27,13 @@ def preprocessing_numeric(df_numeric, odd_values, rep_value=-999):
                 tmp = list(map(lambda x: inconvertable(x), df_numeric[c]))
                 df_numeric[c].loc[tmp] = str(rep_value)
                 df_numeric[c] = df_numeric[c].astype(int)
-            
-        # odd_values to rep_value
-        df_numeric[c] = df_numeric[c].fillna(rep_value)
-        for o in odd_values:
-            df_numeric[c].loc[df_numeric[c] == o] = rep_value
+
+        if rep_value == 'neighbor_mean':
+            odd_idx = sorted(set(list(df_numeric[c].isna().index) + list((df_numeric[c] in odd_values).index)))
+            df_numeric[c].iloc[odd_idx] = list(map(lambda x: df_numeric[c].iloc[x].mean(), nn[odd_idx]))
+        else:
+            df_numeric[c] = df_numeric[c].fillna(rep_value)
+            df_numeric[c].loc[df_numeric[c] in odd_values] = rep_value
 
     return df_numeric
 
