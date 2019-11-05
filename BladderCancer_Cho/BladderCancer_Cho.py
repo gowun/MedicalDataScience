@@ -85,9 +85,9 @@ class BladderCander():
         if mode == 'logistic_regression':
             X, _ = pp.scale_btw_01(X, self.scaler)
             model = self.logistic_regression
-        elif mode == 'decition_tree':
+        elif mode == 'decision_tree':
             model = self.decision_tree
-        elif mode == 'decition_tree_only_markers':
+        elif mode == 'decision_tree_only_markers':
             model = self.decision_tree_only_markers
         elif mode == 'random_forest':
             model = self.random_forest
