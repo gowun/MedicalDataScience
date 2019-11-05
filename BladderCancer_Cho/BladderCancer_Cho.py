@@ -83,7 +83,7 @@ class BladderCander():
 
     def make_score(self, mode, X):
         if mode == 'logistic_regression':
-            X = pp.scale_btw_01(X, self.scaler)
+            X, _ = pp.scale_btw_01(X, self.scaler)
             model = self.logistic_regression
         elif mode == 'decition_tree':
             model = self.decision_tree
@@ -91,9 +91,8 @@ class BladderCander():
             model = self.decision_tree_only_markers
         elif mode == 'random_forest':
             model = self.random_forest
-        print(X.head())
-        cols = list(model['columns'])
-        return model['model'].predict_proba(X[cols])[:, 1]
+        
+        return model['model'].predict_proba(X[model['columns']])[:, 1]
 
 
     def draw_multiple_KM_graphs(self, durations, group, event):
