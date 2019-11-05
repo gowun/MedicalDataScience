@@ -1,8 +1,8 @@
 import pandas as pd
 import numpy as np
 from sklearn.linear_model import LogisticRegression
-from metrics import *
-from survival_analysis import *
+from .metrics import *
+from .survival_analysis import *
 
 def logiReg_model_with_performance(train_X_y, max_iter, valid_X_y=None, class_weight=None):
     X, y = train_X_y

@@ -6,7 +6,7 @@ import graphviz
 from sklearn.ensemble import RandomForestClassifier
 from lifelines.statistics import multivariate_logrank_test
 from .metrics import *
-from .survival_analysis import
+from .survival_analysis import *
 
 
 def tree_model_with_performance(train_X_y, min_sample_leaf, max_depth=None, valid_X_y=None, class_weight=None):
