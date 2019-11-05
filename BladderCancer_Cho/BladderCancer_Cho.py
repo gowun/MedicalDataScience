@@ -1,5 +1,6 @@
 import numpy as np 
 import pandas as pd 
+import os
 from itertools import combinations
 from itertools import chain
 from ..modeling_tools import preprocessing as pp 
@@ -11,16 +12,17 @@ from ..modeling_tools import utils as ut
 
 class BladderCander():
     def __init__(self):
-        self.Xy = ut.load_data('./Xy_for_tree.pkl', 'pickle')
-        self.event, self.durations = ut.load_data('./event_durations.pkl', 'pickle')
-        self.selected_Xs_with_importance = ut.load_data('./selected_Xs.csv', 'csv')
-        self.col_combinations = ut.load_data('./col_combinations.pkl', 'pickle')
-        self.only_marker_combinations = ut.load_data('./only_marker_combinations.pkl', 'pickle')
-        self.scaler = ut.load_data('./scaler.pkl', 'pickle')
-        self.random_forest = ut.load_data('./random_forest.pkl', 'pickle')
-        self.decision_tree = ut.load_data('./decision_tree.pkl', 'pickle')
-        self.decision_tree_only_markers = ut.load_data('./decision_tree_only_markers.pkl', 'pickle')
-        self.logistic_regression = ut.load_data('./logistic_regression.pkl', 'pickle')
+        home_path = os.path.abspath('MedicalDataScience/BladderCancer_Cho/')
+        self.Xy = ut.load_data(home_path + 'Xy_for_tree.pkl', 'pickle')
+        self.event, self.durations = ut.load_data(home_path + 'event_durations.pkl', 'pickle')
+        self.selected_Xs_with_importance = ut.load_data(home_path + 'selected_Xs.csv', 'csv')
+        self.col_combinations = ut.load_data(home_path + 'col_combinations.pkl', 'pickle')
+        self.only_marker_combinations = ut.load_data(home_path + 'only_marker_combinations.pkl', 'pickle')
+        self.scaler = ut.load_data(home_path + 'scaler.pkl', 'pickle')
+        self.random_forest = ut.load_data(home_path + 'random_forest.pkl', 'pickle')
+        self.decision_tree = ut.load_data(home_path + 'decision_tree.pkl', 'pickle')
+        self.decision_tree_only_markers = ut.load_data(home_path + 'decision_tree_only_markers.pkl', 'pickle')
+        self.logistic_regression = ut.load_data(home_path + 'logistic_regression.pkl', 'pickle')
 
 
     def make_varied_cases(self, change=False):
