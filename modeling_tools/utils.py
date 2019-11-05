@@ -11,3 +11,10 @@ def save_as_file_colab(obj, path, mode):
     nm = 'tmp.pkl'
     pickle.dump(obj, open(nm, 'wb'))
   os.system('cp ' + nm + " '"+ path + "'")
+
+
+def load_data(path, mode):
+    if mode == 'csv':
+        return pd.read_csv(path)
+    elif mode == 'pickle':
+        return pickle.load(open(path, 'rb'))

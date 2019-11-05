@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.linear_model import LogisticRegression
 from metrics import *
+from survival_analysis import *
 
 def logiReg_model_with_performance(train_X_y, max_iter, valid_X_y=None, class_weight=None):
     X, y = train_X_y
@@ -23,3 +24,27 @@ def logiReg_model_with_performance(train_X_y, max_iter, valid_X_y=None, class_we
     result['columns'] = X.columns
 
     return result
+
+
+def train_and_filter_models(train_X_y, col_list, max_iter, min_auc, event, duration, max_pvalue, valid_X=None):
+    X, y = train_X_y
+    if valid_X is None:
+        vX = X
+    else:
+        vX = valid_X
+    X_list = list(map(lambda x: X[x], col_list))
+    mds = list(map(lambda x: logiReg_model_with_performance([x, y], max_iter, class_weight='balanced'), X_list))
+    mds = list(filter(lambda x: x['performance']['AUC'] >= min_auc, mds))
+    preds = list(map(lambda x: x['model'].predict(vX[x['columns']]), mds))
+    ps = list(map(lambda x: logrank_pvalue(duration, x, event), preds))
+    mds = list(filter(lambda x: x[1] <= max_pvalue, zip(mds, ps)))
+    mds = list(map(lambda x: x[0], mds))
+
+    tmp = list(map(lambda x: x['performance']['AUC'], mds))
+    order = list(zip(range(len(mds)), tmp))
+    order = sorted(order, key=lambda a: a[1], reverse=True)
+    models = list()
+    for o, _ in order:
+        models.append(mds[o])
+    
+    return models

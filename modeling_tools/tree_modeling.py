@@ -6,6 +6,7 @@ import graphviz
 from sklearn.ensemble import RandomForestClassifier
 from lifelines.statistics import multivariate_logrank_test
 from metrics import *
+from survival_analysis import *
 
 
 def tree_model_with_performance(train_X_y, min_sample_leaf, max_depth=None, valid_X_y=None, class_weight=None):
@@ -292,18 +293,36 @@ def count_by_cutoff(data_df, rule_df):
   return cnts
 
 
-def modeling_random_forest(X, y, n_estimators, max_depth, min_sample_leaf, ratio_features=0.8):
+def random_forest_with_performance(train_X_y, n_estimators, max_depth, min_sample_leaf, ratio_features=0.8, valid_X_y=None):
+    X, y = train_X_y
+    if valid_X_y is None:
+      vX = X
+      vy = y
+    else:
+      vX, vy = valid_X_y
     rf = RandomForestClassifier(class_weight='balanced_subsample', max_features=ratio_features, 
                                 n_estimators=n_estimators, max_depth=max_depth, 
                                 min_samples_leaf=min_sample_leaf, random_state=1234).fit(X, y)
+    pred = rf.predict(vX)
+    prob = rf.predict_proba(vX)[:, 1]
+    
+    performance = compute_performance(vy, pred, prob)
+    
     features = pd.DataFrame({'feature': X.columns, 'importance': rf.feature_importances_}).sort_values(by='importance', ascending=False)
     features = features.loc[features['importance'] > 0.0]
-    return rf, features
+
+    result = dict()
+    result['model'] = rf
+    result['feature importance'] = features
+    result['performance'] = performance
+    result['columns'] = X.columns
+
+    return result
 
 
-def select_important_variables(X, y, topN, n_estimators, max_depth, min_sample_leaf, ratio_features):
-    _, features = modeling_random_forest(X, y, n_estimators, max_depth, min_sample_leaf, ratio_features)
-    return features['feature'].values[:topN]
+def select_important_variables(Xy, topN, n_estimators, max_depth, min_sample_leaf, ratio_features):
+    rr = random_forest_with_performance(Xy, n_estimators, max_depth, min_sample_leaf, ratio_features)
+    return rr['feature importance']['feature'].values[:topN]
 
 
 def train_and_filter_models(train_Xy, col_list, depth_list, sample_leaf, min_auc, event, duration, max_pvalue, valid_X=None):
@@ -318,8 +337,8 @@ def train_and_filter_models(train_Xy, col_list, depth_list, sample_leaf, min_auc
         mds = sequential_tree_modeling(X_list, y, sample_leaf, d, class_weight='balanced')
         mds = list(filter(lambda x: x['performance']['AUC'] >= min_auc, mds))
         preds = list(map(lambda x: x['model'].predict(vX[x['columns']]), mds))
-        ps = list(map(lambda x: multivariate_logrank_test(duration, x, event), preds))
-        mds = list(filter(lambda x: x[1].p_value <= max_pvalue, zip(mds, ps)))
+        ps = list(map(lambda x: logrank_pvalue(duration, x, event), preds))
+        mds = list(filter(lambda x: x[1] <= max_pvalue, zip(mds, ps)))
         models += list(map(lambda x: x[0], mds))
         print(len(models))
     
