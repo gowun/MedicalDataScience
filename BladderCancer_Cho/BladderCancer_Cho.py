@@ -12,7 +12,7 @@ from ..modeling_tools import utils as ut
 
 class BladderCander():
     def __init__(self):
-        home_path = os.path.abspath('MedicalDataScience/BladderCancer_Cho/')
+        home_path = os.path.abspath('MedicalDataScience/BladderCancer_Cho/') + '/'
         self.Xy = ut.load_data(home_path + 'Xy_for_tree.pkl', 'pickle')
         self.event, self.durations = ut.load_data(home_path + 'event_durations.pkl', 'pickle')
         self.selected_Xs_with_importance = ut.load_data(home_path + 'selected_Xs.csv', 'csv')
