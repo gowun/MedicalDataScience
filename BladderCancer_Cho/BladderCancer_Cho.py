@@ -112,11 +112,11 @@ class BladderCander():
         return performance
 
 
-    def compare_auces(self):
+    def compare_auces(self, X):
         names = ['logistic_regression', 'decision_tree', 'decision_tree_only_markers', 'random_forest']
         scores = list()
         for md in names:
-            scores.append(self.make_score(md, self.Xy[0]))
+            scores.append(self.make_score(md, X))
         
         mt.draw_auc(self.Xy[1], scores, label_list=names)
 
