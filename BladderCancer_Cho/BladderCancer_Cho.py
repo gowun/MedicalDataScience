@@ -2,7 +2,7 @@ import numpy as np
 import pandas as pd 
 from itertools import combinations
 from itertools import chain
-from modeling_tools import preprocessing as pp 
+from ..modeling_tools import preprocessing as pp 
 from modeling_tools import tree_modeling as tm 
 from modeling_tools import linear_modeling as lm 
 from modeling_tools import metrics as mt 
