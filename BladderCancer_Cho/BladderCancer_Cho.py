@@ -92,7 +92,8 @@ class BladderCander():
         elif mode == 'random_forest':
             model = self.random_forest
 
-        return model['model'].predict_proba(X[model['columns']])[:, 1]
+        score_arr =  model['model'].predict_proba(X[model['columns']])
+        return score_arr[:, 1]
 
 
     def draw_multiple_KM_graphs(self, durations, group, event):
@@ -116,11 +117,7 @@ class BladderCander():
         names = ['logistic_regression', 'decision_tree', 'decision_tree_only_markers', 'random_forest']
         scores = list()
         for md in names:
-            if md == 'logistic_regression':
-                X = self.Xy[0]
-            else:
-                X = self.Xy[0]
-            scores.append(self.make_score(md, X))
+            scores.append(self.make_score(md, self.Xy[0]))
         
         mt.draw_auc(self.Xy[1], scores, label_list=names)
 
