@@ -29,13 +29,13 @@ def preprocessing_numeric(df_numeric, odd_values, rep_value=-999):
                 else:
                     df_numeric[c].loc[tmp] = str(rep_value)
                 df_numeric[c] = df_numeric[c].astype(int)
-
+        odd_idx = np.array(df_numeric.index)[list(map(lambda x: x in odd_values, df_numeric[c]))]
         if rep_value == 'neighbor_mean':
-            odd_idx = sorted(set(list(df_numeric[c].isna().index) + list((df_numeric[c] in odd_values).index)))
+            odd_idx = sorted(set(list(odd_idx) + list(np.array(df_numeric.index)[df_numeric[c].isna()])))
             df_numeric[c].iloc[odd_idx] = list(map(lambda x: df_numeric[c].iloc[x].mean(), nn[odd_idx]))
         else:
             df_numeric[c] = df_numeric[c].fillna(rep_value)
-            df_numeric[c].loc[df_numeric[c] in odd_values] = rep_value
+            df_numeric[c].iloc[odd_idx] = rep_value
 
     return df_numeric
 
