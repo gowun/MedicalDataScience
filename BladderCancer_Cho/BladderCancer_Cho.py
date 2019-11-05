@@ -91,8 +91,10 @@ class BladderCander():
             model = self.decision_tree_only_markers
         elif mode == 'random_forest':
             model = self.random_forest
-
-        score_arr =  model['model'].predict_proba(X[model['columns']])
+        print(model)
+        print(model['columns'])
+        cols = model['columns']
+        score_arr =  model['model'].predict_proba(X[cols])
         return score_arr[:, 1]
 
 
