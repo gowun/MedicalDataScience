@@ -5,8 +5,8 @@ from sklearn.tree import _tree
 import graphviz
 from sklearn.ensemble import RandomForestClassifier
 from lifelines.statistics import multivariate_logrank_test
-from metrics import *
-from survival_analysis import *
+import metrics as mt
+import survival_analysis as sa
 
 
 def tree_model_with_performance(train_X_y, min_sample_leaf, max_depth=None, valid_X_y=None, class_weight=None):
@@ -20,7 +20,7 @@ def tree_model_with_performance(train_X_y, min_sample_leaf, max_depth=None, vali
     pred = clf.predict(vX)
     prob = clf.predict_proba(vX)[:, 1]
     
-    performance = compute_performance(vy, pred, prob)
+    performance = mt.compute_performance(vy, pred, prob)
     
     fi = pd.DataFrame({'feature': X.columns, 'importance': clf.feature_importances_}).sort_values(by='importance', ascending=False)
     fi = fi.loc[fi['importance'] > 0]
@@ -306,7 +306,7 @@ def random_forest_with_performance(train_X_y, n_estimators, max_depth, min_sampl
     pred = rf.predict(vX)
     prob = rf.predict_proba(vX)[:, 1]
     
-    performance = compute_performance(vy, pred, prob)
+    performance = mt.compute_performance(vy, pred, prob)
     
     features = pd.DataFrame({'feature': X.columns, 'importance': rf.feature_importances_}).sort_values(by='importance', ascending=False)
     features = features.loc[features['importance'] > 0.0]
@@ -337,7 +337,7 @@ def train_and_filter_models(train_Xy, col_list, depth_list, sample_leaf, min_auc
         mds = sequential_tree_modeling(X_list, y, sample_leaf, d, class_weight='balanced')
         mds = list(filter(lambda x: x['performance']['AUC'] >= min_auc, mds))
         preds = list(map(lambda x: x['model'].predict(vX[x['columns']]), mds))
-        ps = list(map(lambda x: logrank_pvalue(duration, x, event), preds))
+        ps = list(map(lambda x: sa.logrank_pvalue(duration, x, event), preds))
         mds = list(filter(lambda x: x[1] <= max_pvalue, zip(mds, ps)))
         models += list(map(lambda x: x[0], mds))
         print(len(models))
