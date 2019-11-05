@@ -91,11 +91,9 @@ class BladderCander():
             model = self.decision_tree_only_markers
         elif mode == 'random_forest':
             model = self.random_forest
-        print(model)
-        print(model['columns'])
-        cols = model['columns']
-        score_arr =  model['model'].predict_proba(X[cols])
-        return score_arr[:, 1]
+        
+        cols = list(model['columns'])
+        return model['model'].predict_proba(X[cols])[:, 1]
 
 
     def draw_multiple_KM_graphs(self, durations, group, event):
