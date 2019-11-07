@@ -101,13 +101,13 @@ class BladderCander():
             km_list.append(sa.do_KM_analysis(durations[c].values, group, event, ['Pred_NR', 'Pred_R'], c))
     
 
-    def do_validation(self, mode, X, y, cutoff=0.5):
+    def do_validation(self, mode, X, y, duration_df, event, cutoff=0.5):
         score = self.make_score(mode, X)
         pred = np.array([0] * len(y))
         pred[score >= cutoff] = 1
         performance = mt.compute_performance(y, pred, score)
         mt.draw_auc(y, [score])
-        self.draw_multiple_KM_graphs(self.durations, pred, self.event)
+        self.draw_multiple_KM_graphs(duration_df, pred, event)
         
         return performance
 
