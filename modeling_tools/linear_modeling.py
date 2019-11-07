@@ -6,7 +6,7 @@ from .survival_analysis import *
 
 def logiReg_model_with_performance(train_X_y, max_iter, valid_X_y=None, class_weight=None):
     X, y = train_X_y
-    clf = LogisticRegression(class_weight=class_weight, max_iter=max_iter, random_state=1234).fit(X, y)
+    clf = LogisticRegression(class_weight=class_weight, max_iter=max_iter).fit(X, y)
     if valid_X_y is None:
         vX = X
         vy = y

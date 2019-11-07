@@ -14,3 +14,7 @@ def load_data(path, mode):
         return pd.read_csv(path)
     elif mode == 'pickle':
         return pickle.load(open(path, 'rb'))
+
+
+def transpose_df(df):
+    return pd.DataFrame(df.values.T, columns=df.index, index=df.columns)
