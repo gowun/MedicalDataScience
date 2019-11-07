@@ -27,7 +27,7 @@ def find_max_len_by_ch(string, ch_list, splt='_'):
   return list(map(lambda x: max_len(x, split_str), ch_list))
 
 
-def compute_cluster_impurity(link_info, class_labels):
+def compute_linkage_impurity(link_info, class_labels):
   def find_values(LRmode, which, labels):
     v = int(link_info.iloc[which][LRmode])
     if v in range(len(class_labels)):
@@ -87,11 +87,15 @@ def compute_cluster_impurity(link_info, class_labels):
   return impurity, link_info
 
 
-def find_lowest_impurity(feature_sets, df, class_labels, print_all=False):
+def compute_cluster_impurity(df, class_labels):
+    links = pd.DataFrame(linkage(df.values, method='average'), columns=['left', 'right', 'distance', 'level'])
+    return compute_linkage_impurity(links, class_labels)
+
+
+def find_features_of_lowest_impurity(feature_sets, df, class_labels):
   impurity_list = []
   for fs in feature_sets:
-    links = pd.DataFrame(linkage(df[fs].values, method='average'), columns=['left', 'right', 'distance', 'level'])
-    im, _ = compute_cluster_impurity(links, class_labels)
+    im, _ = compute_cluster_impurity(df[fs], class_labels)
     impurity_list.append(im)
 
   result = dict()
