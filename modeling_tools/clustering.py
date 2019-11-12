@@ -106,24 +106,31 @@ def find_features_of_lowest_impurity(feature_sets, df, class_labels):
   return result
 
 
-def plot_cluster_heatmap(df, transpose=False):
+def plot_cluster_heatmap(df, title=None, transpose=False):
     if transpose:
         df = transpose_df(df)
     df = df.astype(float)
-    sns.clustermap(df)
+    if title is None:
+        sns.clustermap(df)
+    else:
+        sns.clustermap(df).set_title(title)
 
 
-def plot_sequential_cluster_heatmap(df, var_list, transpose=False):
-    for vs in var_list:
+def plot_sequential_cluster_heatmap(df, var_list, title_list=None, transpose=False):
+    for i, vs in enumerate(var_list):
         ins = list(map(lambda x: x in df.columns, vs))
         var = np.array(vs)[ins]
-        plot_cluster_heatmap(df[var], transpose=transpose)
+        dd = {'df': df[var], 'transpose': transpose}
+        if title_list is not None:
+            dd['title'] = title_list[i]
+        plot_cluster_heatmap(**dd)
 
 
 def parallel_impurity(arg_set):
   fts_set, df, labels = arg_set
   rr = find_features_of_lowest_impurity(fts_set, df, labels)
   return rr
+
 
 def find_features_of_lowest_impurity_parallel(nProc, feature_comb, df, labels):
   block_size = round(len(feature_comb) / nProc)
