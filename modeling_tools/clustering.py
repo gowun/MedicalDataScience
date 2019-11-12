@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 import seaborn as sns
+import matplotlib.pyplot as plt
 from scipy.cluster.hierarchy import linkage
 from itertools import combinations
 from multiprocessing import Pool
@@ -106,17 +107,17 @@ def find_features_of_lowest_impurity(feature_sets, df, class_labels):
   return result
 
 
-def plot_cluster_heatmap(df, title=None, transpose=False):
+def plot_cluster_heatmap(df, transpose=False, title=None):
     if transpose:
         df = transpose_df(df)
     df = df.astype(float)
-    if title is None:
-        sns.clustermap(df)
-    else:
-        sns.clustermap(df).set_title(title)
+    sns.clustermap(df)
+    if title is not None:
+        plt.title(title)
+    plt.show()
 
 
-def plot_sequential_cluster_heatmap(df, var_list, title_list=None, transpose=False):
+def plot_sequential_cluster_heatmap(df, var_list, transpose=False, title_list=None):
     for i, vs in enumerate(var_list):
         ins = list(map(lambda x: x in df.columns, vs))
         var = np.array(vs)[ins]
