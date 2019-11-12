@@ -15,6 +15,7 @@ def compute_performance(real_y, pred_y, prob):
     performance['recall'] = met.recall_score(real_y, pred_y)
     performance['f1'] = met.f1_score(real_y, pred_y)
     performance['mcc'] = met.matthews_corrcoef(real_y, pred_y)
+    performance['R2'] = met.r2_score(real_y, prob)
     
     print(performance)
 

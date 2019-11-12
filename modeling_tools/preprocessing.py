@@ -4,6 +4,94 @@ from sklearn.preprocessing import OneHotEncoder
 from sklearn.neighbors import NearestNeighbors
 from imblearn.over_sampling import SMOTE
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.preprocessing import MaxAbsScaler
+from sklearn.preprocessing import StandardScaler
+from sklearn.preprocessing import RobustScaler
+from sklearn.preprocessing import Normalizer
+from sklearn.preprocessing import QuantileTransformer
+from sklearn.preprocessing import PowerTransformer
+from scipy.stats import normaltest
+from statsmodels.stats.outliers_influence import variance_inflation_factor
+from multiprocessing import Pool
+from itertools import chain, combinations
+from .figure_eda import *
+
+
+def do_all_scalers(X):
+  distributions = {
+      'Unscaled data': X.values,
+      'Data after standard scaling': StandardScaler().fit_transform(X),
+      'Data after min-max scaling': MinMaxScaler().fit_transform(X),
+      'Data after max-abs scaling': MaxAbsScaler().fit_transform(X),
+      'Data after robust scaling': RobustScaler(quantile_range=(25, 75)).fit_transform(X),
+      'Data after power transformation (Yeo-Johnson)': PowerTransformer(method='yeo-johnson').fit_transform(X),
+      'Data after quantile transformation (gaussian pdf)': QuantileTransformer(output_distribution='normal').fit_transform(X),
+      'Data after sample-wise L2 normalizing': Normalizer().fit_transform(X)
+      }
+  
+  return distributions
+
+
+def check_normality(distributions, ith_feature, feature_name, data_labels=None, draw=False):
+  normal = dict()
+  for i in ['Unscaled data', 'Data after standard scaling', 'Data after min-max scaling', 'Data after max-abs scaling', 'Data after robust scaling', 'Data after power transformation (Yeo-Johnson)', 'Data after quantile transformation (gaussian pdf)', 'Data after sample-wise L2 normalizing']:
+    method = i
+    arr1d = distributions[i][:, ith_feature]
+    normal[method] = normaltest(arr1d)
+    if draw:
+      plot_histogram(arr1d, 'stack', data_labels, feature_name, method)
+
+  return normal
+
+
+def find_best_normalization(df, distributions, class_labels=None):
+    method_scores = {}
+    for i, col in enumerate(df.columns):
+        tmp = check_normality(distributions, i, col, class_labels)
+        for k, v in tmp.items():
+            if v[1] >= 0.05:
+                if k in method_scores.keys():
+                    method_scores[k] += 1
+                else:
+                    method_scores[k] = 0
+    tmp = list(method_scores.values())
+    max_idx = tmp.index(max(tmp))
+    method = list(method_scores.keys())[max_idx]
+    print(method)
+    nor_df = pd.DataFrame(distributions[method], columns=df.columns, index=df.index)
+    return nor_df
+
+
+def compute_VIF(df, features, upper_limit=100):
+  def  part_vif(vs):
+    part = dict()
+    for i,v in enumerate(vs):
+      tmp = variance_inflation_factor(df[vs].values, i)
+      if tmp < upper_limit:
+        part[v] = tmp
+    return part
+
+  in_tf = list(map(lambda x: x in df.columns, features))
+  vvs = np.array(features)[in_tf]
+  while len(vvs) > 16:
+    if len(vvs) % 16 == 1:
+      start_idxes = list(range(0, len(vvs), 15))
+      end_idxes = start_idxes[1:] + [len(vvs)]
+    else:
+      start_idxes = list(range(0, len(vvs), 16))
+      end_idxes = start_idxes[1:] + [len(vvs)]
+    dict_list = []
+    for i, j in zip(start_idxes, end_idxes):
+      dict_list.append(part_vif(vvs[i:j]))
+    np.random.seed(1234)
+    vvs = sorted(set(chain(*map(lambda x: list(x.keys()), dict_list))))
+    vvs = np.random.choice(vvs, len(vvs), replace=False)
+    #print(vvs)
+  
+  vif_dict = part_vif(vvs)
+  vif_df = pd.DataFrame({'feature': list(vif_dict.keys()), 'VIF': list(vif_dict.values())})
+  
+  return vif_df
 
 
 def preprocessing_numeric(df_numeric, odd_values, rep_value=-999):
@@ -144,3 +232,5 @@ def binning(df, minmax_by_col_dict):
                 tf = (df[c] > mn) * (df[c] <= mx)
             df[c].loc[tf] = i
     return df
+
+

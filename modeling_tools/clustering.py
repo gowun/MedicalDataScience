@@ -2,6 +2,8 @@ import pandas as pd
 import numpy as np
 import seaborn as sns
 from scipy.cluster.hierarchy import linkage
+from itertools import combinations
+from multiprocessing import Pool
 from .utils import *
 
 
@@ -116,3 +118,55 @@ def plot_sequential_cluster_heatmap(df, var_list, transpose=False):
         ins = list(map(lambda x: x in df.columns, vs))
         var = np.array(vs)[ins]
         plot_cluster_heatmap(df[var], transpose=transpose)
+
+
+def parallel_impurity(arg_set):
+  fts_set, df, labels = arg_set
+  rr = find_features_of_lowest_impurity(fts_set, df, labels)
+  return rr
+
+def find_features_of_lowest_impurity_parallel(nProc, feature_comb, df, labels):
+  block_size = round(len(feature_comb) / nProc)
+  print(block_size)
+  block_start_idx = list(range(0, len(feature_comb), block_size))
+  blocks = list()
+  feature_comb = np.array(feature_comb)
+  for i, s in enumerate(block_start_idx):
+    if i < len(block_start_idx) - 1:
+      blocks.append(feature_comb[s:block_start_idx[i+1]])
+    else:
+      blocks.append(feature_comb[s:])
+  pool = Pool(processes=nProc)
+  blocks = list(map(lambda x: [x, df, labels], blocks))
+  result = pool.map(parallel_impurity, blocks)
+  im_list = list(map(lambda x: x['impurity'], result))
+  
+  min_im = min(im_list)
+  min_idx = im_list.index(min_im)
+  return result[min_idx]
+
+
+def find_best_feature_comb_parallel(X, y, varlist_dict, nProc=20, nMin=5, save_path=None):
+    best_comb = dict()
+    for i, vv in enumerate(varlist_dict.items()):
+        print('~~~' + str(i) + '~~~')
+        k, vs = vv
+        if len(vs) > nMin:
+            min_impurity = {'impurity': len(vs) + 1}
+            for n_fs in range(nMin, len(vs)):
+                comb = list(map(lambda x: list(x), list(combinations(vs, n_fs))))
+                print(len(comb))
+                if len(comb) > nProc:
+                    result = find_features_of_lowest_impurity_parallel(nProc, comb, X, y)
+                else:
+                    result = find_features_of_lowest_impurity_parallel(len(comb), comb, X, y)
+                if result['impurity'] == 0:
+                    break
+                elif result['impurity'] < min_impurity['impurity']:
+                    min_impurity = result
+            best_comb[k] = result['features']
+        else:
+            best_comb[k] = vs
+        if save_path is not None:
+            save_as_file_colab(best_comb[k], save_path + k + '.pkl', 'pickle')
+    return best_comb
