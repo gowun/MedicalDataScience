@@ -86,7 +86,6 @@ def filter_by_VIF_MI(df, features, y, upper_limit=100):
     filtered = []
     for i, j in zip(start_idxes, end_idxes):
       tmp = part_calc(vvs[i:j])
-      print(tmp)
       filtered.append(tmp['feature'].values)
     np.random.seed(1234)
     vvs = list(chain(*filtered))
@@ -94,7 +93,6 @@ def filter_by_VIF_MI(df, features, y, upper_limit=100):
     #print(vvs)
   
   total = part_calc(vvs)
-  print(total)
   return total
 
 
