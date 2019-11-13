@@ -67,7 +67,7 @@ def filter_by_VIF_MI(df, features, y, upper_limit=100):
     total = pd.DataFrame({'feature': vs, 'MI': mutual_info_classif(df[vs], y, n_neighbors=len(vs), random_state=1234)})
     total['VIF'] = list(map(lambda x: variance_inflation_factor(df[vs].values, x), range(len(vs))))
 
-    total = total.loc[total['MI'] >= 0].loc[total['VIF'] <= upper_limit]
+    total = total.loc[total['MI'] > 0].loc[total['VIF'] <= upper_limit]
 
     return total
 
