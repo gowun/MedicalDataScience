@@ -159,8 +159,10 @@ def find_best_feature_comb_parallel(X, y, varlist_dict, nProc=20, nMin=5, save_p
     for i, vv in enumerate(varlist_dict.items()):
         print('~~~' + str(i) + '~~~')
         k, vs = vv
-        if len(vs) > nMin:
-            min_impurity = {'impurity': len(vs) + 1}
+        min_impurity = compute_cluster_impurity(X[vs], y)
+        if min_impurity['impurity'] == 0:
+            best_comb[k] = vs
+        else:
             for n_fs in range(nMin, len(vs)):
                 comb = list(map(lambda x: list(x), list(combinations(vs, n_fs))))
                 print(len(comb))
@@ -168,13 +170,13 @@ def find_best_feature_comb_parallel(X, y, varlist_dict, nProc=20, nMin=5, save_p
                     result = find_features_of_lowest_impurity_parallel(nProc, comb, X, y)
                 else:
                     result = find_features_of_lowest_impurity_parallel(len(comb), comb, X, y)
+
                 if result['impurity'] == 0:
                     break
                 elif result['impurity'] < min_impurity['impurity']:
                     min_impurity = result
             best_comb[k] = result['features']
-        else:
-            best_comb[k] = vs
+    
         if save_path is not None:
             save_as_file_colab(best_comb[k], save_path + k + '.pkl', 'pickle')
     return best_comb
