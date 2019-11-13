@@ -2,6 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.neighbors import NearestNeighbors
+from sklearn.feature_selection import mutual_info_classif
 from imblearn.over_sampling import SMOTE
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import MaxAbsScaler
@@ -12,8 +13,7 @@ from sklearn.preprocessing import QuantileTransformer
 from sklearn.preprocessing import PowerTransformer
 from scipy.stats import normaltest
 from statsmodels.stats.outliers_influence import variance_inflation_factor
-from multiprocessing import Pool
-from itertools import chain, combinations
+from itertools import chain
 from .figure_eda import *
 
 
@@ -62,36 +62,39 @@ def find_best_normalization(df, distributions, class_labels=None):
     return nor_df
 
 
-def compute_VIF(df, features, upper_limit=100):
-  def  part_vif(vs):
-    part = dict()
-    for i,v in enumerate(vs):
-      tmp = variance_inflation_factor(df[vs].values, i)
-      if tmp < upper_limit:
-        part[v] = tmp
-    return part
+def filter_by_VIF_MI(df, features, y, upper_limit=500):
+  def  part_calc(vs):
+    nNeigh = max([5, round(np.sqrt(len(vs)))])
+    total = pd.DataFrame({'feature': vs, 'MI': mutual_info_classif(df[vs], y, n_neighbors=nNeigh)})
+    total['VIF'] = list(map(lambda x: variance_inflation_factor(df[vs].values, x), range(len(vs))))
+
+    total['VIF/MI'] = total['VIF'] / total['MI'] 
+
+    total = total.loc[total['VIF/MI'] <= upper_limit].sort_values(by='VIF/MI').reset_index(drop=True)
+
+    return total
 
   in_tf = list(map(lambda x: x in df.columns, features))
   vvs = np.array(features)[in_tf]
-  while len(vvs) > 16:
+  while len(vvs) > 16:  ## since VIF can process only 16 variables at the same time
     if len(vvs) % 16 == 1:
       start_idxes = list(range(0, len(vvs), 15))
       end_idxes = start_idxes[1:] + [len(vvs)]
     else:
       start_idxes = list(range(0, len(vvs), 16))
       end_idxes = start_idxes[1:] + [len(vvs)]
-    dict_list = []
+    filtered = []
     for i, j in zip(start_idxes, end_idxes):
-      dict_list.append(part_vif(vvs[i:j]))
+      tmp = part_calc(vvs[i:j])
+      print(tmp)
+      filtered.append(tmp['feature'].values)
     np.random.seed(1234)
-    vvs = sorted(set(chain(*map(lambda x: list(x.keys()), dict_list))))
-    vvs = np.random.choice(vvs, len(vvs), replace=False)
+    vvs = np.random.choice(list(chain(*filtered)), len(vvs), replace=False)
     #print(vvs)
   
-  vif_dict = part_vif(vvs)
-  vif_df = pd.DataFrame({'feature': list(vif_dict.keys()), 'VIF': list(vif_dict.values())})
+  total = part_calc(vvs)
   
-  return vif_df
+  return total
 
 
 def preprocessing_numeric(df_numeric, odd_values, rep_value=-999):
