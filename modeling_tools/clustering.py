@@ -40,6 +40,7 @@ def compute_linkage_impurity(link_info, class_labels):
       labels[LRmode][which] = '_'.join([labels['left'][which_], labels['right'][which_]])
     return labels
   
+  class_labels = list(map(lambda x: str(x), class_labels))
   link_info['new_level'] = list(range(len(class_labels), len(class_labels) + len(link_info)))
   labels = dict()
   labels['left'] = [''] * len(link_info)
@@ -159,7 +160,7 @@ def find_best_feature_comb_parallel(X, y, varlist_dict, nProc=20, nMin=5, save_p
     for i, vv in enumerate(varlist_dict.items()):
         print('~~~' + str(i) + '~~~')
         k, vs = vv
-        min_impurity = compute_cluster_impurity(X[vs], y)
+        min_impurity = find_features_of_lowest_impurity([vs], X, y)
         if min_impurity['impurity'] == 0:
             best_comb[k] = vs
         else:
