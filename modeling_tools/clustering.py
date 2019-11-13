@@ -177,7 +177,7 @@ def find_best_feature_comb_parallel(X, y, varlist_dict, nProc=20, nMin=5, save_p
                 elif result['impurity'] < min_impurity['impurity']:
                     min_impurity = result
             best_comb[k] = result['features']
-    
+        print([k, min_impurity])
         if save_path is not None:
             save_as_file_colab(best_comb[k], save_path + k + '.pkl', 'pickle')
     return best_comb
