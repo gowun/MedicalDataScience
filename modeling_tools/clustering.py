@@ -174,7 +174,7 @@ def find_best_feature_comb_parallel(X, y, varlist_dict, nProc=20, nMin=5, save_p
 
                 if result['impurity'] == 0:
                     break
-                elif result['impurity'] < min_impurity['impurity']:
+                elif result['impurity'] <= min_impurity['impurity'] and len(result['features']) < len(min_impurity['features']):
                     min_impurity = result
             best_comb[k] = result['features']
         print([k, min_impurity])
