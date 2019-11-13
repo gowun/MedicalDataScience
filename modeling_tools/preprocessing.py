@@ -71,7 +71,8 @@ def filter_by_VIF_MI(df, features, y, upper_limit=100):
     if len(tmp) < 5:
         total['MI/VIF'] = total['MI'] / total['VIF']
         total = total.sort_values(by='MI/VIF', ascending=False).drop(['MI/VIF'], 1)[:5]
-
+    else:
+        total = tmp
     return total
 
   in_tf = list(map(lambda x: x in df.columns, features))
@@ -91,7 +92,7 @@ def filter_by_VIF_MI(df, features, y, upper_limit=100):
     vvs = list(chain(*filtered))
     vvs = np.random.choice(vvs, len(vvs), replace=False)
     #print(vvs)
-  
+  print(vvs)
   total = part_calc(vvs)
   return total
 
