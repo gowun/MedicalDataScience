@@ -21,7 +21,7 @@ def do_all_scalers(X):
   X = X.astype(float)
   X_log2 = pd.DataFrame()
   for c in X.columns:
-      X_log2[c] = np.log2(X[c])
+      X_log2[c] = np.log2(X[c]).apply(lambda x: max([x, 0.0]))
   distributions = {
       'Unscaled data': X.values,
       'Data after log2 normalizing': X_log2.values,
