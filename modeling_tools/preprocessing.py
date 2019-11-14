@@ -63,7 +63,7 @@ def find_best_normalization(df, distributions, class_labels=None):
     tmp = list(method_scores.values())
     max_idx = tmp.index(max(tmp))
     method = list(method_scores.keys())[max_idx]
-    print(method)
+    print(method_scores)
     nor_df = pd.DataFrame(distributions[method], columns=df.columns, index=df.index)
     return nor_df
 
