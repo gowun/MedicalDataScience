@@ -18,8 +18,13 @@ from .figure_eda import *
 
 
 def do_all_scalers(X):
+  X_log2 = pd.DataFrame()
+  for c in X.columns:
+      X_log2[c] = np.log2(X[c])
   distributions = {
       'Unscaled data': X.values,
+      'Data after log2 normalizing': X_log2.values,
+      'Data after log2 norm. -> minmax_scaling': MinMaxScaler().fit_transform(X_log2),
       'Data after standard scaling': StandardScaler().fit_transform(X),
       'Data after min-max scaling': MinMaxScaler().fit_transform(X),
       'Data after max-abs scaling': MaxAbsScaler().fit_transform(X),
