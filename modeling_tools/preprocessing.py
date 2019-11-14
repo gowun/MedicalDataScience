@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.neighbors import NearestNeighbors
-from sklearn.feature_selection import mutual_info_classif
+from sklearn.feature_selection import mutual_info_classif, mutual_info_regression
 from imblearn.over_sampling import SMOTE
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import MaxAbsScaler
@@ -68,22 +68,27 @@ def find_best_normalization(df, distributions, class_labels=None):
     return nor_df
 
 
-def filter_by_VIF_MI(df, features, y, upper_limit=100):
-  def  part_calc(vs):
-    total = pd.DataFrame({'feature': vs, 'MI': mutual_info_classif(df[vs], y, n_neighbors=len(vs), random_state=1234)})
+def filter_by_VIF_MI(df, features, y, mode='clas', upper_limit=100, nMin=5):
+  def  part_calc(vs, nMin):
+    if mode == 'clas':
+        tmp = mutual_info_classif(df[vs], y, n_neighbors=len(vs), random_state=1234)
+    elif mode == 'reg':
+        tmp = mutual_info_regression(df[vs], y, n_neighbors=len(vs), random_state=1234)
+    total = pd.DataFrame({'feature': vs, 'MI': tmp})
     total['VIF'] = list(map(lambda x: variance_inflation_factor(df[vs].values, x), range(len(vs))))
 
-    tmp = total.loc[total['MI'] > 0.000001].loc[total['VIF'] <= upper_limit]
-    if len(tmp) < 5:
+    idx = list(total.loc[total['MI'] > 0.000001].loc[total['VIF'] <= upper_limit].index)
+    if len(idx) < nMin:
         total['MI/VIF'] = total['MI'] / total['VIF']
-        total = total.sort_values(by='MI/VIF', ascending=False).drop(['MI/VIF'], 1)[:5]
-    else:
-        total = tmp
-    return total
+        last = total.drop(idx).sort_values(by='MI/VIF', ascending=False)[:nMin-len(idx)].index 
+        idx += list(last)
+    return total.iloc[idx]
 
+  np.random.seed(1234)
   in_tf = list(map(lambda x: x in df.columns, features))
   vvs = np.array(features)[in_tf]
   while len(vvs) > 16:  ## since VIF can process only 16 variables at the same time
+    vvs = np.random.choice(vvs, len(vvs), replace=False)
     if len(vvs) % 16 == 1:
       start_idxes = list(range(0, len(vvs), 15))
       end_idxes = start_idxes[1:] + [len(vvs)]
@@ -92,14 +97,12 @@ def filter_by_VIF_MI(df, features, y, upper_limit=100):
       end_idxes = start_idxes[1:] + [len(vvs)]
     filtered = []
     for i, j in zip(start_idxes, end_idxes):
-      tmp = part_calc(vvs[i:j])
+      tmp = part_calc(vvs[i:j], nMin)
       filtered.append(tmp['feature'].values)
-    np.random.seed(1234)
     vvs = list(chain(*filtered))
-    vvs = np.random.choice(vvs, len(vvs), replace=False)
     #print(vvs)
   print(vvs)
-  total = part_calc(vvs)
+  total = part_calc(vvs, nMin)
   return total
 
 
