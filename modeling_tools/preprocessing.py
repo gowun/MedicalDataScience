@@ -59,7 +59,7 @@ def find_best_normalization(df, distributions, class_labels=None):
                 if k in method_scores.keys():
                     method_scores[k] += 1
                 else:
-                    method_scores[k] = 0
+                    method_scores[k] = 1
     tmp = list(method_scores.values())
     max_idx = tmp.index(max(tmp))
     method = list(method_scores.keys())[max_idx]
