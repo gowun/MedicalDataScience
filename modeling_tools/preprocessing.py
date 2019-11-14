@@ -18,6 +18,7 @@ from .figure_eda import *
 
 
 def do_all_scalers(X):
+  X = X.astype(float)
   X_log2 = pd.DataFrame()
   for c in X.columns:
       X_log2[c] = np.log2(X[c])
