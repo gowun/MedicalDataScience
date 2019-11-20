@@ -75,7 +75,7 @@ class BladderCander():
         return tm.select_models(models, 2, print_score=True)
 
 
-    def do_yourself_decision_tree_only_markers(self, nOver=100000, max_depths=[3, 4], min_AUC=0.75):
+    def do_yourself_decision_tree_only_markers(self, nOver=100000, max_depths=[3, 4], min_AUC=0.7):
         over_Xy = self.make_oversampling(self.Xy, nOver)
         sample_leaf = round(nOver / len(self.Xy[0]) * 3/2)
         dur = self.durations.values.T[0]
