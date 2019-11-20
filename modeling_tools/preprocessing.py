@@ -78,10 +78,10 @@ def filter_by_VIF_MI(df, features, y, mode='clas', upper_limit=100, nMin=5):
     tmp = []
     if mode == 'clas':
         for _ in range(10):
-            tmp.append(SelectKBest(mutual_info_classif, 'all').fit(df[vs], y))
+            tmp.append(SelectKBest(mutual_info_classif, 'all').fit_transform(df[vs], y))
     elif mode == 'reg':
         for _ in range(10):
-            tmp.append(SelectKBest(mutual_info_regression, 'all').fit(df[vs], y))
+            tmp.append(SelectKBest(mutual_info_regression, 'all').fit_transform(df[vs], y))
     tmp = list(map(lambda x: np.mean(x), np.array(tmp).T))
     total = pd.DataFrame({'feature': vs, 'MI': tmp})
     total['VIF'] = list(map(lambda x: variance_inflation_factor(df[vs].values, x), range(len(vs))))
