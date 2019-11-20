@@ -74,7 +74,7 @@ def find_best_normalization(df, distributions, class_labels):
 
 
 def filter_by_VIF_MI(df, features, y, mode='clas', upper_limit=100, nMin=5):
-  def  part_calc(vs, nMin):
+  def part_calc(vs, nMin):
     tmp = []
     if mode == 'clas':
         for _ in range(10):
@@ -93,7 +93,6 @@ def filter_by_VIF_MI(df, features, y, mode='clas', upper_limit=100, nMin=5):
         idx += list(last)
     return total.iloc[idx]
 
-  np.random.seed(1234)
   in_tf = list(map(lambda x: x in df.columns, features))
   vvs = np.array(features)[in_tf]
   while len(vvs) > 16:  ## since VIF can process only 16 variables at the same time
