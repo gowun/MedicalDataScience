@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 from sklearn.neighbors import NearestNeighbors
-from sklearn.feature_selection import mutual_info_classif, mutual_info_regression
+from sklearn.feature_selection import mutual_info_classif, mutual_info_regression, SelectKBest
 from imblearn.over_sampling import SMOTE
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import MaxAbsScaler
@@ -38,9 +38,9 @@ def do_all_scalers(X):
   return distributions
 
 
-def check_normality(distributions, ith_feature, feature_name, data_labels=None, draw=False):
+def check_varied_normality(distributions, ith_feature, feature_name, data_labels=None, draw=False):
   normal = dict()
-  for i in ['Unscaled data', 'Data after standard scaling', 'Data after min-max scaling', 'Data after max-abs scaling', 'Data after robust scaling', 'Data after power transformation (Yeo-Johnson)', 'Data after quantile transformation (gaussian pdf)', 'Data after sample-wise L2 normalizing']:
+  for i in distributions.keys():
     method = i
     arr1d = distributions[i][:, ith_feature]
     normal[method] = normaltest(arr1d)
@@ -50,16 +50,21 @@ def check_normality(distributions, ith_feature, feature_name, data_labels=None, 
   return normal
 
 
-def find_best_normalization(df, distributions, class_labels=None):
+def find_normality_degree(df, distributions, class_labels):
     method_scores = {}
     for i, col in enumerate(df.columns):
-        tmp = check_normality(distributions, i, col, class_labels)
+        tmp = check_varied_normality(distributions, i, col, class_labels)
         for k, v in tmp.items():
             if v[1] >= 0.05:
                 if k in method_scores.keys():
                     method_scores[k] += 1
                 else:
                     method_scores[k] = 1
+    return method_scores
+
+
+def find_best_normalization(df, distributions, class_labels):
+    method_scores = find_normality_degree(df, distributions, class_labels)
     tmp = list(method_scores.values())
     max_idx = tmp.index(max(tmp))
     method = list(method_scores.keys())[max_idx]
@@ -70,10 +75,14 @@ def find_best_normalization(df, distributions, class_labels=None):
 
 def filter_by_VIF_MI(df, features, y, mode='clas', upper_limit=100, nMin=5):
   def  part_calc(vs, nMin):
+    tmp = []
     if mode == 'clas':
-        tmp = mutual_info_classif(df[vs], y, n_neighbors=len(vs), random_state=1234)
+        for _ in range(10):
+            tmp.append(SelectKBest(mutual_info_classif, 'all').fit(df[vs], y))
     elif mode == 'reg':
-        tmp = mutual_info_regression(df[vs], y, n_neighbors=len(vs), random_state=1234)
+        for _ in range(10):
+            tmp.append(SelectKBest(mutual_info_regression, 'all').fit(df[vs], y))
+    tmp = list(map(lambda x: np.mean(x), np.array(tmp).T))
     total = pd.DataFrame({'feature': vs, 'MI': tmp})
     total['VIF'] = list(map(lambda x: variance_inflation_factor(df[vs].values, x), range(len(vs))))
 
@@ -182,6 +191,24 @@ def scale_btw_01(df, given_scaler=None):
 def random_oversampling(idx_list, n):
     np.random.seed(1234)
     return np.random.choice(idx_list, n)
+
+
+def make_surrogate_data(X, n_samples, target_ratios=[0.5, 0.5]):
+    sam_y = np.random.choice([0, 1], n_samples, replace=True, p=target_ratios)
+    dd = {'a': X.values}
+    sam_X = []
+    for i, col in enumerate(X.columns):
+        tmp = check_varied_normality(dd, i, col)
+        if tmp['a'][1] < 0.05 or len(set(X[col])) <= 2:
+            ratios = pd.value_counts(X[col]) / len(X)
+            idx = sorted(ratios.index)
+            ratios = list(ratios[idx])
+            sam_X.append(np.random.choice(idx, n_samples, replace=True, p=ratios))
+        else:
+            sam_X.append(np.random.normal(np.mean(X[col]), np.std(X[col]), n_samples))
+    sam_X = pd.DataFrame(np.array(sam_X).T, columns=X.columns)
+
+    return sam_X, sam_y
 
 
 def SMOTE_oversampling(X, y, k_neighbors, n_samples, target_ratios=[0.5, 0.5]):
