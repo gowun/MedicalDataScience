@@ -12,7 +12,7 @@ from ..modeling_tools import utils as ut
 from ..modeling_tools import figure_eda as fe 
 from ..modeling_tools import clustering as cl 
 
-class BladderCanderQuantSeq():
+class BladderCancerQuantSeq():
     def __init__(self):
         self.home_path = os.path.abspath('MedicalDataScience/BladderCancer_Shin/') + '/'
         self.org_df, self.nor_df = ut.load_data(self.home_path + 'two_data_v1.1.pkl', 'pickle')
