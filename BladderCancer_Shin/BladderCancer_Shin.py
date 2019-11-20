@@ -41,7 +41,7 @@ class BladderCancerQuantSeq():
             return self.nor_df
 
 
-    def do_yourself_select_features_by_MI_VIF(self, upper_limit=1000):
+    def do_yourself_select_features_by_MI_VIF(self, upper_limit=1000, nMin=3):
         features_list = list(map(lambda x: self.random_forest['feature importance']['feature'].values[:x], range(5, 30)))
         classifiers = {'gowun': cl.find_features_of_lowest_impurity(features_list, self.nor_df, self.y)}
         tmp = ut.load_data(self.home_path + 'Classifiers.csv', 'csv')
@@ -53,14 +53,14 @@ class BladderCancerQuantSeq():
         filtered = {}
         for k, vs in classifiers.items():
             print('!!!!!' + k + '!!!!!')
-            tmp = pp.filter_by_VIF_MI(self.nor_df, vs, self.y, upper_limit)
+            tmp = pp.filter_by_VIF_MI(self.nor_df, vs, self.y_01, upper_limit, nMin)
             print(tmp)
             filtered[k] = tmp['feature'].values
         return filtered 
 
 
-    def do_yourself_best_feature_combination(self, filtered, mMin=3, update=False):
-        best_comb = cl.find_best_feature_comb_parallel(self.nor_df, self.y, filtered, nMin=mMin)
+    def do_yourself_best_feature_combination(self, filtered, nMin=3, update=False):
+        best_comb = cl.find_best_feature_comb_parallel(self.nor_df, self.y, filtered, nMin=nMin)
         classifiers = {}
         classifier_df = pd.DataFrame()
         order = list(best_comb.keys())
