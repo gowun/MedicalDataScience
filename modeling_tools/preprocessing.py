@@ -96,11 +96,11 @@ def filter_by_VIF_MI(df, features, y, upper_limit=100, nMin=5):
         else:
             start_idxes = list(range(0, len(vvs), 16))
             end_idxes = start_idxes[1:] + [len(vvs)]
-    filtered = []
-    for i, j in zip(start_idxes, end_idxes):
-        tmp = part_calc(vvs[i:j])
-        filtered.append(tmp['feature'].values)
-    vvs = list(chain(*filtered))
+        filtered = []
+        for i, j in zip(start_idxes, end_idxes):
+            tmp = part_calc(vvs[i:j])
+            filtered.append(tmp['feature'].values)
+        vvs = list(chain(*filtered))
     
     print(vvs)
     total = part_calc(vvs)
