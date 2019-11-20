@@ -30,6 +30,21 @@ class BladderCancerQuantSeq():
         self.score_df = ut.load_data(self.home_path + 'filtered_scores.csv', 'csv')
         self.performance_df = ut.load_data(self.home_path + 'filtered_compared_performance.csv', 'csv')
 
+
+    def make_oversampling(self, Xy, nOver=1000):
+        X, y = Xy
+        over_idx = pp.random_oversampling(X.index, nOver)
+        return X.iloc[over_idx], np.array(y)[over_idx]
+    
+
+    def do_yourself_random_forest(self, nOver=1000, nIter=1000, change=False):
+        over_Xy = self.make_oversampling([self.org_df, self.y_01], nOver)
+        sample_leaf = round(nOver / len(self.y_01) * 3/2)
+        result = tm.random_forest_with_performance(over_Xy, nIter, 3, sample_leaf)
+        if change:
+            self.random_forest = result
+        else:
+            return result
     
     def do_yourself_find_best_normalization(self, update=False):
         dists = pp.do_all_scalers(self.org_df)
