@@ -1,0 +1,10 @@
+gowun,Metacore&GSEA target genes,GSEA_R enrichment_all,GSEA_R enrichment_intersection,BC Basal,BC basal-9gene,BC Luminal,BC Luminal-16gene,BC P53 pathway,BC P53like,BC P63 pathway,Basal-squamous_ref.eau-cancer genome,Luminal_ref.eau-cancer genome,Luminal-infiltrated_ref.eau-cancer genome,Luminal-papillary_ref.eau-cancer genome,Neuronal_ref.eau-cancer genome
+ZNF764,NUBP2,CD3E,CD247,HDAC1,CD44,HTT,FOXA1,RFC4,SMARCB1,TNC,CD274,PPARG,DACT3,FOXA1,ENHO
+QARS,TXLNGY,IFNA2,CD3E,TP63,KRT6A,TP53,KRT19,UHRF1,HTT,GFI1,IL20RB,GABBR2,PGM5,LGALS4,SNAI1
+MRM1,EIF2S1,CSF2,KLRD1,PPARA,KRT5,PPARA,PPARG,NUPR1,TP53,S100A7,GBP5,AGAP11,IGF1,HSD17B2,SCN4A
+HELZ2,,MX2,ICAM1,,,,FABP4,,,PTPN12,,,,,
+PCBD1,,IL11,HIST1H2BF,,,,,,,S100A8,,,,,
+,,XAF1,,,,,,,,KRT6A,,,,,
+,,PLEK,,,,,,,,PLAU,,,,,
+,,OAS2,,,,,,,,F3,,,,,
+,,,,,,,,,,CSTA,,,,,

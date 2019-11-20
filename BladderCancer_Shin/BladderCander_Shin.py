@@ -62,16 +62,16 @@ class BladderCanderQuantSeq():
     def do_yourself_best_feature_combination(self, filtered, mMin=3, update=False):
         best_comb = cl.find_best_feature_comb_parallel(self.nor_df, self.y, filtered, nMin=mMin)
         classifiers = {}
-        #classifier_df = pd.DataFrame()
+        classifier_df = pd.DataFrame()
         order = list(best_comb.keys())
-        #max_len = max(list(map(lambda x: len(x[1]), best_comb.items())))
+        max_len = max(list(map(lambda x: len(x[1]), best_comb.items())))
         for k in order:
-            #classifier_df[k] = list(best_comb[k]) + [''] * (max_len - len(best_comb[k]))
+            classifier_df[k] = list(best_comb[k]) + [''] * (max_len - len(best_comb[k]))
             classifiers[k] = best_comb[k]
         if update:
             self.classifiers = classifiers
         else:
-            return classifiers
+            return classifiers, classifier_df
 
     
     def do_yourself_modeling(self, update=False):
