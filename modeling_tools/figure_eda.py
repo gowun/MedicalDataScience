@@ -25,7 +25,7 @@ def plot_histogram(arr1d, mode, data_labels=None, xaxis=None, title=None):
             l = labels[i]
         else:
             l = None
-        fig.add_trace(go.Histogram(x=d, name=l, bin_size=.2))
+        fig.add_trace(go.Histogram(x=d, name=l))
 
     arg_dict = {'yaxis_title_text': 'Count', 'barmode': mode, 'xaxis_title_text': xaxis, 'title_text': title}
     fig.update_layout(**arg_dict)
