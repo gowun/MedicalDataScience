@@ -10,6 +10,7 @@ def divide_data(arr1d, data_labels=None):
         data_arr = []
         for l in labels:
             data_arr.append(np.array(arr1d)[np.array(data_labels) == l])
+        labels = list(map(lambda x: str(x), labels))
     else:
         labels = None
         data_arr = [np.array(arr1d)]
