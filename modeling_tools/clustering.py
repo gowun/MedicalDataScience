@@ -108,11 +108,11 @@ def find_features_of_lowest_impurity(feature_sets, df, class_labels):
   return result
 
 
-def plot_cluster_heatmap(df, transpose=False, method='average', metric='euclidean', title=None):
+def plot_cluster_heatmap(df, transpose=False, method='average', metric='euclidean', title=None, figsize=None):
     if transpose:
         df = transpose_df(df)
     df = df.astype(float)
-    sns.clustermap(df, method=method, metric=metric)
+    sns.clustermap(df, method=method, metric=metric, figsize=figsize)
     if title is not None:
         plt.title(title)
     plt.show()
