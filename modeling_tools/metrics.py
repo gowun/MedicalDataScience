@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import shap
 import graphviz
-from scipy.stats from ttest_ind, ttest_rel
+from scipy.stats import ttest_ind, ttest_rel
 
 
 def compute_performance(real_y, pred_y, prob):
@@ -43,7 +43,11 @@ def draw_auc(y_true, y_score_list, pos_label=1, label_list=None):
   plt.show()
 
 
-def 
+# mode in ['ind', 'rel']
+def do_ttest_2dfs(df_list, min_pvalue, mode='ind'):
+  cols = df_list[0].columns
+
+  
 
 
 def compute_shap_value(model, X):
