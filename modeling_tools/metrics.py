@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 import shap
 import graphviz
+from scipy.stats from ttest_ind, ttest_rel
 
 
 def compute_performance(real_y, pred_y, prob):
@@ -40,6 +41,9 @@ def draw_auc(y_true, y_score_list, pos_label=1, label_list=None):
     plt.plot(p[0], p[1], color=c, lw=2, label=l)
   plt.legend(loc="lower right")
   plt.show()
+
+
+def 
 
 
 def compute_shap_value(model, X):

@@ -91,8 +91,8 @@ def compute_linkage_impurity(link_info, class_labels):
   return impurity, link_info
 
 
-def compute_cluster_impurity(df, class_labels):
-    links = pd.DataFrame(linkage(df.values, method='average'), columns=['left', 'right', 'distance', 'level'])
+def compute_cluster_impurity(df, class_labels, method='average'):
+    links = pd.DataFrame(linkage(df.values, method=method), columns=['left', 'right', 'distance', 'level'])
     return compute_linkage_impurity(links, class_labels)
 
 
@@ -108,11 +108,11 @@ def find_features_of_lowest_impurity(feature_sets, df, class_labels):
   return result
 
 
-def plot_cluster_heatmap(df, transpose=False, title=None):
+def plot_cluster_heatmap(df, transpose=False, method='average', title=None):
     if transpose:
         df = transpose_df(df)
     df = df.astype(float)
-    sns.clustermap(df)
+    sns.clustermap(df, method=method)
     if title is not None:
         plt.title(title)
     plt.show()
