@@ -50,5 +50,5 @@ def plot_box(arr1d, axis, data_labels, axis_title, no_bg=False):
         fig.update_layout(yaxis_title=axis_title)
     
     if no_bg:
-        fig.layout.paper_bgcolor = '#fff'
+        fig.layout.plot_bgcolor = '#fff'
     fig.show()
