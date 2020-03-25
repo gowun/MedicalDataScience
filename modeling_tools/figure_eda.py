@@ -18,7 +18,7 @@ def divide_data(arr1d, data_labels=None):
 
 
 ## mode in ['overlay', 'stack']
-def plot_histogram(arr1d, mode, data_labels=None, xaxis=None, title=None):
+def plot_histogram(arr1d, mode='stack', data_labels=None, xaxis=None, title=None):
     data_arr, labels = divide_data(arr1d, data_labels) 
     fig = go.Figure()
     for i, d in enumerate(data_arr):
@@ -35,7 +35,7 @@ def plot_histogram(arr1d, mode, data_labels=None, xaxis=None, title=None):
     fig.show()
 
 
-def plot_box(arr1d, axis, data_labels, axis_title):
+def plot_box(arr1d, axis, data_labels, axis_title, no_bg=False):
     data_arr, labels = divide_data(arr1d, data_labels)
     fig = go.Figure()
     for i, l in enumerate(labels):
@@ -48,4 +48,7 @@ def plot_box(arr1d, axis, data_labels, axis_title):
         fig.update_layout(xaxis_title=axis_title)
     elif axis == 'y':
         fig.update_layout(yaxis_title=axis_title)
+    
+    if no_bg:
+        fig.layout.paper_bgcolor = '#fff'
     fig.show()
